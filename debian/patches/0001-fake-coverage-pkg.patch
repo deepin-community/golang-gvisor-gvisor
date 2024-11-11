@@ -1,0 +1,50 @@
+From: Shengjing Zhu <zhsj@debian.org>
+Date: Tue, 13 Sep 2022 16:39:26 +0800
+Subject: fake coverage pkg
+
+pkg/coverage/coverage.go needs github.com/bazelbuild/rules_go
+which is not packaged.
+
+And coverage info is not useful for end users.
+
+Forwarded: not-needed
+---
+ pkg/coverage/coverage.go      |  4 ++--
+ pkg/coverage/coverage_fake.go | 13 +++++++++++++
+ 2 files changed, 15 insertions(+), 2 deletions(-)
+ create mode 100644 pkg/coverage/coverage_fake.go
+
+diff --git a/pkg/coverage/coverage.go b/pkg/coverage/coverage.go
+index 11a42d4..0a46e51 100644
+--- a/pkg/coverage/coverage.go
++++ b/pkg/coverage/coverage.go
+@@ -12,8 +12,8 @@
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
+ 
+-//go:build !false
+-// +build !false
++//go:build ignore
++// +build ignore
+ 
+ // Package coverage provides an interface through which Go coverage data can
+ // be collected, converted to kcov format, and exposed to userspace.
+diff --git a/pkg/coverage/coverage_fake.go b/pkg/coverage/coverage_fake.go
+new file mode 100644
+index 0000000..2ad488f
+--- /dev/null
++++ b/pkg/coverage/coverage_fake.go
+@@ -0,0 +1,13 @@
++package coverage
++
++import "io"
++
++func Available() bool                          { return false }
++func EnableReport(w io.WriteCloser)            {}
++func KcovSupported() bool                      { return false }
++func ClearCoverageData()                       {}
++func ConsumeCoverageData(w io.Writer) int      { return 0 }
++func InitCoverageData()                        {}
++func Report() error                            { return nil }
++func Symbolize(out io.Writer, pc uint64) error { return nil }
++func WriteAllBlocks(out io.Writer) error       { return nil }

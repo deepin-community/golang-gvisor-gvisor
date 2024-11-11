@@ -1,0 +1,15 @@
+Tests: netstack
+Depends: dh-golang,
+         golang-any,
+         golang-gvisor-gvisor-dev
+Restrictions: allow-stderr
+
+Tests: runsc
+Architecture: amd64 arm64
+Depends: ca-certificates,
+         curl,
+         runsc
+Restrictions: allow-stderr,
+              needs-root,
+              needs-internet,
+              isolation-container

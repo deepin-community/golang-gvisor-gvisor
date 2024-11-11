@@ -1,4 +1,79 @@
 #!/usr/bin/make -f
 
+include /usr/share/dpkg/default.mk
+
+# shim code is not compatible with containerd/1.15
+# https://github.com/google/gvisor/issues/6449
+export DH_GOLANG_EXCLUDES := \
+	webhook shim \
+	$(filter-out tools/xdp,$(wildcard tools/*))
+
+export DH_GOLANG_INSTALL_EXTRA := \
+	$(wildcard $(addprefix pkg/sentry/platform/systrap/sysmsg/,*.S *.sh))
+
+# runsc needs to be static linked
+export CGO_ENABLED=0
+
+GO_PKG     = gvisor.dev/gvisor
+GO_LDFLAGS = -X $(GO_PKG)/runsc/version.version=$(DEB_VERSION_UPSTREAM)
+VDSO_DIR   = _build/src/$(GO_PKG)/pkg/sentry/loader/vdsodata
+VDSO_SO    = $(VDSO_DIR)/vdso_$(DEB_HOST_ARCH).so
+SYSMSG_DIR = _build/src/$(GO_PKG)/pkg/sentry/platform/systrap/sysmsg
+BPF_OBJ    = \
+	_build/src/$(GO_PKG)/runsc/sandbox/bpf/af_xdp_ebpf.o \
+	_build/src/$(GO_PKG)/runsc/sandbox/bpf/tunnel_veth_ebpf.o \
+	_build/src/$(GO_PKG)/tools/xdp/cmd/bpf/drop_ebpf.o \
+	_build/src/$(GO_PKG)/tools/xdp/cmd/bpf/pass_ebpf.o \
+	_build/src/$(GO_PKG)/tools/xdp/cmd/bpf/redirect_host_ebpf.o \
+	_build/src/$(GO_PKG)/tools/xdp/cmd/bpf/tcpdump_ebpf.o \
+	_build/src/$(GO_PKG)/tools/xdp/cmd/bpf/tunnel_host_ebpf.o
+
 %:
-	dh $@
+	dh $@ --builddirectory=_build --buildsystem=golang
+
+$(VDSO_SO): vdso/*.cc vdso/*.h vdso/*.lds vdso/*.py
+	# sync with vdso/BUILD bazel rules
+	$(CC) $(CC_FLAGS) \
+		-I. \
+		-O2 \
+		-std=c++11 \
+		-fPIC \
+		-fno-sanitize=all \
+		-fno-stack-protector \
+		-shared \
+		-nostdlib \
+		-Wl,-soname=linux-vdso.so.1 \
+		-Wl,--hash-style=sysv \
+		-Wl,--no-undefined \
+		-Wl,-Bsymbolic \
+		-Wl,-z,max-page-size=4096 \
+		-Wl,-z,common-page-size=4096 \
+		-Wl,-Tvdso/vdso_$(DEB_HOST_ARCH).lds \
+		-o $@ \
+		vdso/vdso.cc vdso/vdso_time.cc
+	python3 ./vdso/check_vdso.py --check-data --vdso=$@
+
+%_ebpf.o: %.ebpf.c
+	# sync with tools/bazeldefs/defs.bzl bpf_program
+	clang -O2 -Wall -Werror -target bpf -c $< -o $@ -I/usr/include/$(DEB_HOST_GNU_TYPE)
+
+override_dh_auto_configure:
+	dh_auto_configure
+	$(MAKE) -f $(CURDIR)/debian/rules $(VDSO_SO) $(BPF_OBJ)
+	$(MAKE) -C $(SYSMSG_DIR) -f $(CURDIR)/debian/sysmsg.makefile ARCH=$(DEB_HOST_ARCH) all clean
+	$(RM) $(addprefix $(SYSMSG_DIR)/,*.c *.S *.sh)
+
+override_dh_auto_build:
+	dh_auto_build -- -ldflags "$(GO_LDFLAGS)"
+
+execute_before_dh_auto_install:
+	# replace it with dummy file, so -dev package doesn't have arch dependent file.
+	# no other packages will import pkg/sentry/loader.
+	for arch in amd64 arm64; do \
+		echo > $(VDSO_DIR)/vdso_$$arch.so; \
+		echo > $(SYSMSG_DIR)/sighandler.built-in.$$arch.bin; \
+		cp debian/sighandler_ARCH.tmpl $(SYSMSG_DIR)/sighandler_$$arch.go; \
+	done
+	for file in $(BPF_OBJ); do \
+		echo > $$file; \
+	done
