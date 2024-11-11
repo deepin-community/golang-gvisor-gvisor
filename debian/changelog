@@ -1,5 +1,98 @@
-template-repository (1.0-1) unstable; urgency=medium
+golang-gvisor-gvisor (0.0~20240729.0-4) unstable; urgency=medium
 
-  * Initial release
+  * unset ELF_PACKAGE_METADATA env when building sysmsg object
 
- -- Tsic404 <liuheng@deepin.org>  Sat, 28 Jan 2023 13:46:49 +0800
+ -- Shengjing Zhu <zhsj@debian.org>  Fri, 09 Aug 2024 14:39:29 +0800
+
+golang-gvisor-gvisor (0.0~20240729.0-3) unstable; urgency=medium
+
+  * Drop -Werror when building sysmsg object.
+
+ -- Shengjing Zhu <zhsj@debian.org>  Thu, 08 Aug 2024 16:17:47 +0800
+
+golang-gvisor-gvisor (0.0~20240729.0-2) unstable; urgency=medium
+
+  * Add golang-github-containers-gvisor-tap-vsocks-dev << 0.7.3+ds1-2 to Breaks
+
+ -- Shengjing Zhu <zhsj@debian.org>  Wed, 07 Aug 2024 10:40:52 +0800
+
+golang-gvisor-gvisor (0.0~20240729.0-1) unstable; urgency=medium
+
+  * New upstream snapshot release-20240729.0 (Closes: #1070301)
+    + CVE-2023-7258: Check for mounts marked as unmounted before propagating.
+  * Building bpf objects in tools/xdp
+  * Add libbpf-dev to Build-Depends
+  * Add libc6-dev-i386 to Build-Depends.
+
+ -- Shengjing Zhu <zhsj@debian.org>  Tue, 06 Aug 2024 16:42:26 +0800
+
+golang-gvisor-gvisor (0.0~20230807.0-5) unstable; urgency=medium
+
+  * Team upload.
+  * Bump Standards-Version to 4.7.0 (no change)
+  * Patch pkg/xdp/xdp.go to build with golang-golang-x-sys-dev (>= 0.20.0)
+    XDPUmemReg Size was renamed to Chunk_size in golang.org/x/sys v0.20.0.
+    Fixes 'unknown field Size in struct literal of type
+    "golang.org/x/sys/unix".XDPUmemReg' error.
+    See https://github.com/google/gvisor/issues/10483
+
+ -- Anthony Fok <foka@debian.org>  Sun, 26 May 2024 03:44:01 -0600
+
+golang-gvisor-gvisor (0.0~20230807.0-4) unstable; urgency=medium
+
+  * Fix setting runsc version
+
+ -- Shengjing Zhu <zhsj@debian.org>  Wed, 16 Aug 2023 11:08:26 +0800
+
+golang-gvisor-gvisor (0.0~20230807.0-3) unstable; urgency=medium
+
+  * Add empty sighandler_$arch.go files to -dev package
+  * Run runsc in autopkgtest
+
+ -- Shengjing Zhu <zhsj@debian.org>  Tue, 15 Aug 2023 20:14:33 +0800
+
+golang-gvisor-gvisor (0.0~20230807.0-2) unstable; urgency=medium
+
+  * Fix CFLAGS on arm64
+
+ -- Shengjing Zhu <zhsj@debian.org>  Sat, 12 Aug 2023 00:37:27 +0800
+
+golang-gvisor-gvisor (0.0~20230807.0-1) unstable; urgency=medium
+
+  * New upstream snapshot release-20230807.0
+  * Drop 0002-embed-vdso.so.patch
+  * Adapt vdso binary output location
+  * Generate sighandler built-in binary
+  * Add golang-golang-x-exp-dev to Depends
+  * Breaks nncp << 8.8.2-4~
+
+ -- Shengjing Zhu <zhsj@debian.org>  Thu, 10 Aug 2023 23:32:16 +0800
+
+golang-gvisor-gvisor (0.0~20221219.0-2) unstable; urgency=medium
+
+  * Add autopkgtest for tcpip package on all architectures.
+    This package is usually imported by other package like wireguard-go.
+
+ -- Shengjing Zhu <zhsj@debian.org>  Wed, 04 Jan 2023 22:36:46 +0800
+
+golang-gvisor-gvisor (0.0~20221219.0-1) unstable; urgency=medium
+
+  * New upstream snapshot release-20221219.0
+  * Update Standards-Version to 4.6.2 (no changes)
+  * Regenerate bpf object
+  * Add golang-github-cilium-ebpf-dev to Depends
+  * Add nncp to Breaks
+
+ -- Shengjing Zhu <zhsj@debian.org>  Mon, 02 Jan 2023 05:16:31 +0800
+
+golang-gvisor-gvisor (0.0~20220905.0-2) unstable; urgency=medium
+
+  * Restrict autopkgtest to amd64 and arm64
+
+ -- Shengjing Zhu <zhsj@debian.org>  Thu, 17 Nov 2022 11:14:12 +0800
+
+golang-gvisor-gvisor (0.0~20220905.0-1) unstable; urgency=medium
+
+  * Initial release (Closes: #1019459)
+
+ -- Shengjing Zhu <zhsj@debian.org>  Sun, 25 Sep 2022 16:22:57 +0800

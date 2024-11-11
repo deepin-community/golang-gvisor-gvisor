@@ -1,0 +1,6 @@
+# Don't use uscan to fetch upstream tarball.
+# See debian/README.source for detail.
+version=4
+opts="mode=git, pgpmode=none, uversionmangle=s/^/0.0~/" \
+  https://github.com/google/gvisor \
+  refs/tags/release-@ANY_VERSION@ debian

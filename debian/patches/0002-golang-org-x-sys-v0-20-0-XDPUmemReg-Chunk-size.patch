@@ -1,0 +1,33 @@
+From: Anthony Fok <foka@debian.org>
+Date: Tue, 6 Aug 2024 16:41:57 +0800
+Subject: Rename XDPUmemReg Size to Chunk_size for golang.org/x/sys v0.20.0
+
+Origin: vendor
+Bug: https://github.com/google/gvisor/issues/10483
+Last-Update: 2024-05-26
+
+Fixes 'unknown field Size in struct literal of type
+"golang.org/x/sys/unix".XDPUmemReg' error
+with golang.org/x/sys v0.20.0
+Last-Update: 2024-05-26
+---
+ pkg/xdp/xdp.go | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/pkg/xdp/xdp.go b/pkg/xdp/xdp.go
+index e7bf115..b54cd27 100644
+--- a/pkg/xdp/xdp.go
++++ b/pkg/xdp/xdp.go
+@@ -153,9 +153,9 @@ func NewFromSocket(sockfd int, ifaceIdx, queueID uint32, opts Opts) (*ControlBlo
+ 	}
+ 
+ 	reg := unix.XDPUmemReg{
+-		Addr: uint64(sliceBackingPointer(umemMemory)),
+-		Len:  uint64(len(umemMemory)),
+-		Size: opts.FrameSize,
++		Addr:       uint64(sliceBackingPointer(umemMemory)),
++		Len:        uint64(len(umemMemory)),
++		Chunk_size: opts.FrameSize,
+ 		// Not useful in the RX path.
+ 		Headroom: 0,
+ 		// TODO(b/240191988): Investigate use of SHARED flag.

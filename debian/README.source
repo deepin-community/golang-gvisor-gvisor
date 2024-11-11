@@ -1,0 +1,29 @@
+Upstream repository has two branch:
+
+ + master
+
+   Need to use bazel to build.
+   Have many unrelated source like website.
+   Doesn't have any generated code.
+
+ + go
+
+   Can be built with standard Go toolchains.
+   Generated code is checked in VCS.
+   Only have necessary source.
+
+This source package is based the `go` branch, so we don't need to depend
+on bazel.
+
+However for the generated code checked in the source package, we:
+
++ Repackaging the source package, to keep the code, tools to generate them.
+
+  go_fieldenum go_generics go_marshal go_stateify are in tools/ directory.
+  `protoc-gen-go` is packaged as separated, package name is same as binary name.
+  `stringer` is in golang-golang-x-tools.
+
++ File in binary form (for example vdso) is removed, and regenerated at build
+  time.
+
+Please use debian/update-upstream.sh to update upstream branch.

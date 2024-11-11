@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -ex
+
+# build packages which are usually imported by other package on all arch.
+# https://github.com/WireGuard/wireguard-go/blob/master/tun/netstack/tun.go
+
+export DH_GOLANG_BUILDPKG="gvisor.dev/gvisor/pkg/tcpip/..."
+export DH_GOLANG_EXCLUDES="link/stopfd link/fdbased link/xdp link/sharedmem"
+mkdir -p _build
+cp -a /usr/share/gocode/src _build/
+dh_auto_build --buildsystem=golang --builddirectory=_build

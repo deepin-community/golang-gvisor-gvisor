@@ -1,0 +1,34 @@
+#!/bin/bash
+
+set -ex
+
+arch="$(dpkg --print-architecture)"
+
+case $arch in
+amd64)
+    url="https://github.com/docker-library/busybox/raw/31d342ad033e27c18723a516a2274ab39547be27/stable/glibc/busybox.tar.xz"
+    ;;
+
+arm64)
+    url="https://github.com/docker-library/busybox/raw/94c664b5ca464546266bce54be0082874a44c7b2/stable/glibc/busybox.tar.xz"
+    ;;
+
+*)
+    echo >&2 "error: unsupported architecture: $arch"
+    exit 1
+    ;;
+esac
+
+WORKDIR=$(mktemp -d)
+trap "rm -rf $WORKDIR" 0 INT QUIT ABRT PIPE TERM
+
+cd "$WORKDIR"
+
+curl -o rootfs.tar.xz -fsSL --retry 5 "$url"
+
+mkdir -p rootfs
+tar --exclude './dev/*' -C rootfs -xf rootfs.tar.xz
+
+runsc spec -- /bin/dmesg
+
+runsc run hello
